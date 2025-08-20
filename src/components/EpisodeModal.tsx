@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Check, Play, Tv, Calendar, Clock, Star, Edit3, Save } from 'lucide-react';
 import { WishlistItem } from '../types';
 
@@ -7,30 +7,52 @@ interface EpisodeModalProps {
   onClose: () => void;
   item: WishlistItem;
   onUpdateEpisodes: (itemId: string, watchedEpisodes: number[], currentEpisode: number, totalEpisodes?: number, totalSeasons?: number) => void;
+  onUpdateEpisodesSeasonWise?: (
+    itemId: string,
+    seasonNumber: number,
+    watchedEpisodes: number[],
+    currentEpisode: number,
+    totalEpisodes?: number,
+    totalSeasons?: number
+  ) => void;
 }
 
 export const EpisodeModal: React.FC<EpisodeModalProps> = ({
   isOpen,
   onClose,
   item,
-  onUpdateEpisodes
+  onUpdateEpisodes,
+  onUpdateEpisodesSeasonWise
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [tempTotalEpisodes, setTempTotalEpisodes] = useState(item.totalEpisodes || 12);
-  const [tempTotalSeasons, setTempTotalSeasons] = useState(item.totalSeasons || 1);
+  const seasons = useMemo(() => {
+    return item.seasons && item.seasons.length > 0
+      ? item.seasons
+      : [{ seasonNumber: 1, totalEpisodes: item.totalEpisodes || 12, watchedEpisodes: item.watchedEpisodes || [] }];
+  }, [item.seasons, item.totalEpisodes, item.watchedEpisodes]);
+  const [selectedSeason, setSelectedSeason] = useState<number>(item.currentSeason || seasons[0]?.seasonNumber || 1);
+  const [tempTotalEpisodes, setTempTotalEpisodes] = useState<number>(
+    seasons.find(s => s.seasonNumber === (item.currentSeason || 1))?.totalEpisodes || item.totalEpisodes || 12
+  );
+  const [tempTotalSeasons, setTempTotalSeasons] = useState<number>(item.totalSeasons || seasons.length || 1);
 
-  const watchedEpisodes = item.watchedEpisodes || [];
-  const currentEpisode = item.currentEpisode || 1;
-  const totalEpisodes = item.totalEpisodes || 12;
-  const totalSeasons = item.totalSeasons || 1;
+  const seasonData = seasons.find(s => s.seasonNumber === selectedSeason) || { seasonNumber: selectedSeason, totalEpisodes: item.totalEpisodes || 12, watchedEpisodes: item.watchedEpisodes || [] };
+  const watchedEpisodes = seasonData.watchedEpisodes || [];
+  const totalEpisodes = seasonData.totalEpisodes || 12;
+  const totalSeasons = tempTotalSeasons || seasons.length || 1;
+  const currentEpisode = Math.min((watchedEpisodes[watchedEpisodes.length - 1] || 0) + 1, totalEpisodes);
 
   useEffect(() => {
     if (isOpen) {
       setTempTotalEpisodes(totalEpisodes);
-      setTempTotalSeasons(totalSeasons);
+      setTempTotalSeasons(item.totalSeasons || seasons.length || 1);
       setIsEditing(false);
     }
-  }, [isOpen, totalEpisodes, totalSeasons]);
+  }, [isOpen, totalEpisodes, seasons.length, item.totalSeasons]);
+
+  useEffect(() => {
+    setTempTotalEpisodes(totalEpisodes);
+  }, [selectedSeason, totalEpisodes]);
 
   const toggleEpisode = (episodeNumber: number) => {
     let newWatchedEpisodes;
@@ -51,7 +73,11 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
       if (newCurrentEpisode > totalEpisodes) newCurrentEpisode = totalEpisodes;
     }
 
-    onUpdateEpisodes(item.id, newWatchedEpisodes, newCurrentEpisode, totalEpisodes, totalSeasons);
+    if (onUpdateEpisodesSeasonWise) {
+      onUpdateEpisodesSeasonWise(item.id, selectedSeason, newWatchedEpisodes, newCurrentEpisode, totalEpisodes, totalSeasons);
+    } else {
+      onUpdateEpisodes(item.id, newWatchedEpisodes, newCurrentEpisode, totalEpisodes, totalSeasons);
+    }
   };
 
   // Removed bulk actions per UX request; progress updates should reflect immediately via parent state sync
@@ -60,29 +86,42 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
     const newTotalEpisodes = Math.max(1, tempTotalEpisodes);
     const newTotalSeasons = Math.max(1, tempTotalSeasons);
 
-    // Filter watched episodes to only include valid episode numbers
     const validWatchedEpisodes = watchedEpisodes.filter(ep => ep <= newTotalEpisodes);
     const newCurrentEpisode = Math.min(currentEpisode, newTotalEpisodes);
 
-    onUpdateEpisodes(item.id, validWatchedEpisodes, newCurrentEpisode, newTotalEpisodes, newTotalSeasons);
+    if (onUpdateEpisodesSeasonWise) {
+      onUpdateEpisodesSeasonWise(item.id, selectedSeason, validWatchedEpisodes, newCurrentEpisode, newTotalEpisodes, newTotalSeasons);
+    } else {
+      onUpdateEpisodes(item.id, validWatchedEpisodes, newCurrentEpisode, newTotalEpisodes, newTotalSeasons);
+    }
     setIsEditing(false);
   };
 
   const progressPercentage = (watchedEpisodes.length / totalEpisodes) * 100;
+  const overall = useMemo(() => {
+    return seasons.reduce(
+      (acc, s) => {
+        acc.total += s.totalEpisodes || 0;
+        acc.watched += (s.watchedEpisodes || []).length;
+        return acc;
+      },
+      { total: 0, watched: 0 }
+    );
+  }, [seasons]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-4xl max-h-[90vh] mx-2 sm:mx-4 bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
+      <div className="relative w-full max-w-4xl max-h-[90vh] mx-3 sm:mx-4 bg-gradient-to-br from-gray-900/95 to-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-blue-600 px-5 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <img
               src={item.poster}
               alt={item.title}
-              className="w-12 h-16 object-cover rounded-lg shadow-lg"
+              className="w-12 h-16 object-cover rounded-lg shadow-lg hidden xs:block sm:block"
               onError={(e) => {
                 e.currentTarget.src = '/placeholder-poster.jpg';
               }}
@@ -102,8 +141,9 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-full transition-all duration-200"
+            className="p-3 sm:p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-full transition-all duration-200"
             aria-label="Close"
             title="Close"
           >
@@ -111,7 +151,7 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+        <div className="p-5 sm:p-6 overflow-y-auto max-h-[calc(90vh-72px)]">
           {/* Progress Overview */}
           <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/20 p-6 mb-6">
             <div className="flex items-center gap-4 mb-4">
@@ -123,7 +163,11 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
                 <div className="flex flex-wrap items-center gap-6 text-sm text-gray-300">
                   <span className="flex items-center gap-2">
                     <Tv size={16} />
-                    {watchedEpisodes.length}/{totalEpisodes} episodes
+                    Season {selectedSeason}: {watchedEpisodes.length}/{totalEpisodes} episodes
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Tv size={16} />
+                    Overall: {overall.watched}/{overall.total}
                   </span>
                   {totalSeasons > 1 && (
                     <span className="flex items-center gap-2">
@@ -138,9 +182,11 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsEditing(!isEditing)}
                 className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200 flex items-center gap-2"
                 title="Edit episode count"
+                aria-label="Edit episode and season counts"
               >
                 <Edit3 size={16} />
               </button>
@@ -180,8 +226,9 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
                     />
                   </div>
                 </div>
-                <div className="flex gap-3 mt-4">
+                <div className="flex gap-3 mt-4 flex-wrap">
                   <button
+                    type="button"
                     onClick={saveEpisodeCount}
                     className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 shadow-lg flex items-center gap-2"
                   >
@@ -189,6 +236,7 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
                     Save Changes
                   </button>
                   <button
+                    type="button"
                     onClick={() => {
                       setIsEditing(false);
                       setTempTotalEpisodes(totalEpisodes);
@@ -212,10 +260,27 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
             {/* Control Buttons removed as per new UX */}
           </div>
 
+          {/* Season Selector */}
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-white/80 text-sm">Season:</span>
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: totalSeasons }, (_, i) => i + 1).map(seasonNo => (
+                <button
+                  key={seasonNo}
+                  type="button"
+                  onClick={() => setSelectedSeason(seasonNo)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${selectedSeason === seasonNo ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow' : 'bg-white/10 text-gray-300 hover:bg-white/20'}`}
+                >
+                  {seasonNo}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Episode Grid */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h4 className="text-xl font-bold text-white">Episodes</h4>
+              <h4 className="text-xl font-bold text-white">Episodes (Season {selectedSeason})</h4>
               <div className="flex flex-wrap items-center gap-4 text-xs text-gray-400">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded"></div>
@@ -240,13 +305,14 @@ export const EpisodeModal: React.FC<EpisodeModalProps> = ({
 
                 return (
                   <button
+                    type="button"
                     key={episodeNumber}
                     onClick={() => toggleEpisode(episodeNumber)}
                     className={`aspect-square rounded-xl text-sm font-bold transition-all duration-200 hover:scale-110 relative shadow-lg ${isWatched
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/25 hover:shadow-green-500/40'
-                        : isCurrent
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-purple-500/25 ring-2 ring-purple-400 hover:shadow-purple-500/40'
-                          : 'bg-white/10 text-gray-300 hover:bg-white/20 border border-gray-600/50 hover:border-gray-500 hover:shadow-white/10'
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/25 hover:shadow-green-500/40'
+                      : isCurrent
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-purple-500/25 ring-2 ring-purple-400 hover:shadow-purple-500/40'
+                        : 'bg-white/10 text-gray-300 hover:bg-white/20 border border-gray-600/50 hover:border-gray-500 hover:shadow-white/10'
                       }`}
                     title={
                       isWatched

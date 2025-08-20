@@ -32,6 +32,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => 
             <button
               type="button"
               onClick={clearSearch}
+              aria-label="Clear search"
               className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white transition-colors duration-200"
             >
               <X className="h-5 w-5" />
@@ -42,22 +43,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for movies, TV shows, or anime..."
-            className={`w-full pl-12 py-4 bg-white/10 border border-gray-600/50 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-lg ${
-              query ? 'pr-12' : 'pr-4'
-            }`}
+            className={`w-full pl-12 py-4 bg-white/10 border border-gray-600/50 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-base sm:text-lg ${query ? 'pr-12' : 'pr-4'
+              }`}
           />
         </div>
 
-        <div className="flex flex-wrap gap-4 items-center justify-center">
+        <div className="flex flex-wrap gap-3 sm:gap-4 items-center justify-center">
           <div className="flex flex-col sm:flex-row bg-white/10 backdrop-blur-sm rounded-xl border border-gray-600/50 overflow-hidden">
             <button
               type="button"
               onClick={() => setSearchType('movie')}
-              className={`px-4 sm:px-6 py-3 flex items-center justify-center gap-2 font-medium transition-all duration-200 ${
-                searchType === 'movie'
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-5 sm:px-6 py-3 flex items-center justify-center gap-2 font-medium transition-all duration-200 ${searchType === 'movie'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               <Film size={18} />
               Movies
@@ -65,11 +64,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => 
             <button
               type="button"
               onClick={() => setSearchType('tv')}
-              className={`px-4 sm:px-6 py-3 flex items-center justify-center gap-2 font-medium transition-all duration-200 ${
-                searchType === 'tv'
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-5 sm:px-6 py-3 flex items-center justify-center gap-2 font-medium transition-all duration-200 ${searchType === 'tv'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               <Tv size={18} />
               TV Shows
@@ -77,11 +75,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => 
             <button
               type="button"
               onClick={() => setSearchType('anime')}
-              className={`px-4 sm:px-6 py-3 flex items-center justify-center gap-2 font-medium transition-all duration-200 ${
-                searchType === 'anime'
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-5 sm:px-6 py-3 flex items-center justify-center gap-2 font-medium transition-all duration-200 ${searchType === 'anime'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               <Play size={18} />
               Anime
@@ -93,22 +90,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => 
               <button
                 type="button"
                 onClick={() => setRegion('hollywood')}
-                className={`px-4 sm:px-6 py-3 font-medium transition-all duration-200 ${
-                  region === 'hollywood'
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                }`}
+                className={`px-4 sm:px-6 py-3 font-medium transition-all duration-200 ${region === 'hollywood'
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
               >
                 Hollywood
               </button>
               <button
                 type="button"
                 onClick={() => setRegion('bollywood')}
-                className={`px-4 sm:px-6 py-3 font-medium transition-all duration-200 ${
-                  region === 'bollywood'
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                }`}
+                className={`px-4 sm:px-6 py-3 font-medium transition-all duration-200 ${region === 'bollywood'
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                  : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
               >
                 Bollywood
               </button>

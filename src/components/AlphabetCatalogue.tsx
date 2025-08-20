@@ -19,13 +19,13 @@ export const AlphabetCatalogue: React.FC<AlphabetCatalogueProps> = ({
 
   const groupedItems = useMemo(() => {
     const groups: Record<string, WishlistItem[]> = {};
-    
+
     alphabet.forEach(letter => {
       groups[letter] = items.filter(item =>
         item.title.toUpperCase().startsWith(letter)
       ).sort((a, b) => a.title.localeCompare(b.title));
     });
-    
+
     return groups;
   }, [items]);
 
@@ -40,19 +40,19 @@ export const AlphabetCatalogue: React.FC<AlphabetCatalogueProps> = ({
           {alphabet.map(letter => {
             const isAvailable = availableLetters.includes(letter);
             const isSelected = selectedLetter === letter;
-            
+
             return (
               <button
+                type="button"
                 key={letter}
                 onClick={() => setSelectedLetter(letter)}
                 disabled={!isAvailable}
-                className={`w-10 h-10 rounded-lg font-bold transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-110'
-                    : isAvailable
+                className={`w-10 h-10 rounded-lg font-bold transition-all duration-200 ${isSelected
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-110'
+                  : isAvailable
                     ? 'bg-white/10 text-white hover:bg-white/20 hover:scale-105'
                     : 'bg-gray-700/30 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 {letter}
               </button>
@@ -73,7 +73,7 @@ export const AlphabetCatalogue: React.FC<AlphabetCatalogueProps> = ({
                 ({groupedItems[selectedLetter].length} {groupedItems[selectedLetter].length === 1 ? 'item' : 'items'})
               </span>
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
               {groupedItems[selectedLetter].map(item => (
                 <WishlistCard
                   key={item.id}

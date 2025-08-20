@@ -13,6 +13,9 @@ export interface WishlistItem {
   watchedEpisodes?: number[];
   currentEpisode?: number;
   totalSeasons?: number;
+  // Season-wise tracking (new)
+  seasons?: SeasonProgress[];
+  currentSeason?: number;
 }
 
 export interface WishlistState {
@@ -30,3 +33,9 @@ export type SearchResult = {
   rating?: number;
   originalId: number;
 };
+
+export interface SeasonProgress {
+  seasonNumber: number;
+  totalEpisodes: number;
+  watchedEpisodes: number[];
+}

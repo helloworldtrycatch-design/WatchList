@@ -33,15 +33,15 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
     setIsLoading(true);
     setRandomPick(null);
     setWatchlistPick(null);
-    
+
     try {
       if (pickSource === 'watchlist') {
         let filteredItems = toWatchList;
-        
+
         if (selectedType !== ('any' as any)) {
           filteredItems = toWatchList.filter(item => item.type === selectedType);
         }
-        
+
         if (filteredItems.length > 0) {
           const randomIndex = Math.floor(Math.random() * filteredItems.length);
           setWatchlistPick(filteredItems[randomIndex]);
@@ -51,7 +51,7 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
         setIsLoading(false);
         return;
       }
-      
+
       let results: SearchResult[] = [];
 
       if (selectedType === 'anime') {
@@ -77,30 +77,30 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
       } else {
         const endpoint = selectedType === 'movie' ? 'discover/movie' : 'discover/tv';
         let url = `https://api.themoviedb.org/3/${endpoint}?api_key=1af5c9dacbfde032a6ac8b2ca5666e5d&sort_by=popularity.desc&page=${Math.floor(Math.random() * 5) + 1}`;
-        
+
         if (selectedGenre && selectedGenre !== 'any') {
           const genre = genres.find(g => g.id === selectedGenre);
           if (genre?.tmdbId) {
             url += `&with_genres=${genre.tmdbId}`;
           }
         }
-        
+
         const response = await fetch(url);
         const data = await response.json();
-        
+
         results = data.results
           .filter((item: any) => item.poster_path)
           .map((item: any) => ({
-          id: `${selectedType}_${item.id}`,
-          title: item.title || item.name || 'Unknown Title',
-          description: item.overview,
-          poster: getImageUrl(item.poster_path),
-          type: selectedType,
-          year: item.release_date || item.first_air_date ? 
-            new Date(item.release_date || item.first_air_date).getFullYear().toString() : undefined,
-          rating: item.vote_average > 0 ? item.vote_average : undefined,
-          originalId: item.id
-        }));
+            id: `${selectedType}_${item.id}`,
+            title: item.title || item.name || 'Unknown Title',
+            description: item.overview,
+            poster: getImageUrl(item.poster_path),
+            type: selectedType,
+            year: item.release_date || item.first_air_date ?
+              new Date(item.release_date || item.first_air_date).getFullYear().toString() : undefined,
+            rating: item.vote_average > 0 ? item.vote_average : undefined,
+            originalId: item.id
+          }));
       }
 
       if (results.length > 0) {
@@ -116,7 +116,7 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
 
   const handleAddToList = (list: 'toWatch' | 'watched') => {
     if (!randomPick) return;
-    
+
     const item = {
       id: randomPick.id,
       title: randomPick.title,
@@ -128,7 +128,7 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
       originalId: randomPick.originalId,
       dateAdded: new Date().toISOString()
     };
-    
+
     onAddToWishlist(item, list);
   };
 
@@ -146,25 +146,25 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
 
       {/* Source Selection */}
       <div className="flex justify-center">
-        <div className="flex bg-white/10 backdrop-blur-sm rounded-xl border border-gray-600/50 overflow-hidden">
+        <div className="flex flex-col sm:flex-row bg-white/10 backdrop-blur-sm rounded-xl border border-gray-600/50 overflow-hidden">
           <button
+            type="button"
             onClick={() => setPickSource('discover')}
-            className={`px-6 py-3 font-medium transition-all duration-200 flex items-center gap-2 ${
-              pickSource === 'discover'
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                : 'text-gray-300 hover:text-white hover:bg-white/10'
-            }`}
+            className={`px-6 py-3 font-medium transition-all duration-200 flex items-center gap-2 ${pickSource === 'discover'
+              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+              : 'text-gray-300 hover:text-white hover:bg-white/10'
+              }`}
           >
             <Sparkles size={18} />
             Discover New
           </button>
           <button
+            type="button"
             onClick={() => setPickSource('watchlist')}
-            className={`px-6 py-3 font-medium transition-all duration-200 flex items-center gap-2 ${
-              pickSource === 'watchlist'
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                : 'text-gray-300 hover:text-white hover:bg-white/10'
-            }`}
+            className={`px-6 py-3 font-medium transition-all duration-200 flex items-center gap-2 ${pickSource === 'watchlist'
+              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+              : 'text-gray-300 hover:text-white hover:bg-white/10'
+              }`}
           >
             <List size={18} />
             From My List ({toWatchList.length})
@@ -177,42 +177,42 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
         <div className="flex justify-center">
           <div className="flex bg-white/10 backdrop-blur-sm rounded-xl border border-gray-600/50 overflow-hidden">
             <button
+              type="button"
               onClick={() => setSelectedType('any' as any)}
-              className={`px-6 py-3 font-medium transition-all duration-200 ${
-                selectedType === ('any' as any)
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-6 py-3 font-medium transition-all duration-200 ${selectedType === ('any' as any)
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               All Types ({toWatchList.length})
             </button>
             <button
+              type="button"
               onClick={() => setSelectedType('movie')}
-              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${
-                selectedType === 'movie'
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${selectedType === 'movie'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               Movies ({toWatchList.filter(item => item.type === 'movie').length})
             </button>
             <button
+              type="button"
               onClick={() => setSelectedType('tv')}
-              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${
-                selectedType === 'tv'
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${selectedType === 'tv'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               TV Shows ({toWatchList.filter(item => item.type === 'tv').length})
             </button>
             <button
+              type="button"
               onClick={() => setSelectedType('anime')}
-              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${
-                selectedType === 'anime'
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${selectedType === 'anime'
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               Anime ({toWatchList.filter(item => item.type === 'anime').length})
             </button>
@@ -224,13 +224,13 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
         <div className="flex bg-white/10 backdrop-blur-sm rounded-xl border border-gray-600/50 overflow-hidden">
           {(['movie', 'tv', 'anime'] as const).map((type) => (
             <button
+              type="button"
               key={type}
               onClick={() => setSelectedType(type)}
-              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${
-                selectedType === type
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'text-gray-300 hover:text-white hover:bg-white/10'
-              }`}
+              className={`px-6 py-3 font-medium transition-all duration-200 capitalize ${selectedType === type
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                }`}
             >
               {type === 'tv' ? 'TV Shows' : type}
             </button>
@@ -240,45 +240,46 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
 
       {/* Genre Selection */}
       {pickSource === 'discover' && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4">
-        {genres.map((genre) => {
-          const Icon = genre.icon;
-          return (
-            <button
-              key={genre.id}
-              onClick={() => setSelectedGenre(genre.id)}
-              className={`p-6 rounded-xl border transition-all duration-200 flex flex-col items-center gap-3 ${
-                selectedGenre === genre.id
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+          {genres.map((genre) => {
+            const Icon = genre.icon;
+            return (
+              <button
+                type="button"
+                key={genre.id}
+                onClick={() => setSelectedGenre(genre.id)}
+                className={`p-6 rounded-xl border transition-all duration-200 flex flex-col items-center gap-3 ${selectedGenre === genre.id
                   ? `bg-gradient-to-r ${genre.color} text-white border-transparent shadow-lg scale-105`
                   : 'bg-white/5 border-gray-600/50 text-gray-300 hover:bg-white/10 hover:border-gray-500/50 hover:scale-105'
-              }`}
-            >
-              <Icon size={24} />
-              <span className="font-medium text-sm">{genre.name}</span>
-            </button>
-          );
-        })}
+                  }`}
+              >
+                <Icon size={24} />
+                <span className="font-medium text-sm">{genre.name}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
       {/* Pick Button */}
       <div className="text-center">
         <button
+          type="button"
           onClick={getRandomPick}
           disabled={isLoading || (pickSource === 'watchlist' && toWatchList.length === 0)}
-          className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 flex items-center gap-3 mx-auto"
+          className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 flex items-center gap-3 mx-auto w-full sm:w-auto"
         >
           <Shuffle size={20} />
-          {isLoading 
-            ? 'Finding your perfect match...' 
-            : pickSource === 'watchlist' 
-              ? 'Pick from My List!' 
-              : selectedGenre 
-                ? 'Pick Something Random!' 
+          {isLoading
+            ? 'Finding your perfect match...'
+            : pickSource === 'watchlist'
+              ? 'Pick from My List!'
+              : selectedGenre
+                ? 'Pick Something Random!'
                 : 'Surprise Me!'
           }
         </button>
-        
+
         {pickSource === 'watchlist' && toWatchList.length === 0 && (
           <p className="text-gray-400 text-sm mt-2">Add items to your watchlist first!</p>
         )}
@@ -315,7 +316,7 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
                   </div>
                 </div>
               </div>
-              
+
               <p className="text-gray-300 text-sm leading-relaxed mb-6 line-clamp-4">
                 {randomPick.description || 'No description available.'}
               </p>
@@ -326,25 +327,25 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
                   return (
                     <>
                       <button
+                        type="button"
                         onClick={() => handleAddToList('toWatch')}
                         disabled={inToWatch}
-                        className={`flex-1 py-3 rounded-lg font-medium transition-all duration-200 ${
-                          inToWatch
-                            ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                        }`}
+                        className={`flex-1 py-3 rounded-lg font-medium transition-all duration-200 ${inToWatch
+                          ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                          }`}
                       >
                         {inToWatch ? 'Already in To Watch' : 'Add to To Watch'}
                       </button>
-                      
+
                       <button
+                        type="button"
                         onClick={() => handleAddToList('watched')}
                         disabled={inWatched}
-                        className={`flex-1 py-3 rounded-lg font-medium transition-all duration-200 ${
-                          inWatched
-                            ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-400 hover:to-teal-400 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                        }`}
+                        className={`flex-1 py-3 rounded-lg font-medium transition-all duration-200 ${inWatched
+                          ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-400 hover:to-teal-400 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                          }`}
                       >
                         {inWatched ? 'Already Watched' : 'Mark as Watched'}
                       </button>
@@ -356,7 +357,7 @@ export const RandomPicker: React.FC<RandomPickerProps> = ({ onAddToWishlist, isI
           </div>
         </div>
       )}
-      
+
       {pickSource === 'watchlist' && toWatchList.length > 0 && !watchlistPick && !isLoading && (
         <p className="text-gray-400 text-sm mt-2">Click the button above to pick a random title from your watchlist!</p>
       )}

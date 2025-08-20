@@ -22,7 +22,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const { wishlist, addToWishlist, removeFromWishlist, moveItem, updateEpisodes, isInWishlist } = useWishlist();
+  const { wishlist, addToWishlist, removeFromWishlist, moveItem, updateEpisodes, updateEpisodesSeasonWise, isInWishlist } = useWishlist();
 
   const handleOpenEpisodeModal = (item: WishlistItem) => {
     setSelectedItem(item);
@@ -125,19 +125,19 @@ function App() {
       <div className="relative z-10">
         {/* Header */}
         <header className="sticky top-0 z-40 bg-gradient-to-r from-gray-900/95 to-purple-900/95 backdrop-blur-xl border-b border-gray-700/50 shadow-2xl">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="max-w-7xl mx-auto px-6 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg">
-                  <Film className="w-8 h-8 text-white" />
+                <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg">
+                  <Film className="w-9 h-9 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white">CinemaWish</h1>
-                  <p className="text-sm text-gray-400">Your personal movie & anime wishlist</p>
+                  <h1 className="text-3xl md:text-4xl font-bold text-white">CinemaWish</h1>
+                  <p className="text-sm md:text-base text-gray-400">Your personal movie & anime wishlist</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-5 text-sm md:text-base text-gray-400">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-yellow-400" />
                   <span>{allItems.length} total items</span>
@@ -150,25 +150,28 @@ function App() {
               {/* Mobile hamburger button */}
               <div className="md:hidden flex justify-end mb-4">
                 <button
+                  type="button"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="p-2 text-white hover:bg-white/20 rounded-lg transition-colors duration-200"
+                  aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                  className="p-3 md:p-2 text-white hover:bg-white/20 rounded-lg transition-colors duration-200"
                 >
                   {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
               </div>
 
               {/* Desktop navigation */}
-              <div className="hidden md:flex flex-wrap gap-2">
+              <div className="hidden md:flex flex-wrap gap-3">
                 {navigationItems.map(({ key, label, icon: Icon }) => (
                   <button
+                    type="button"
                     key={key}
                     onClick={() => setCurrentView(key)}
-                    className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${currentView === key
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105'
-                        : 'bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 hover:scale-105'
+                    className={`px-7 py-3.5 rounded-2xl font-medium transition-all duration-200 flex items-center gap-3 text-base ${currentView === key
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105'
+                      : 'bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 hover:scale-105'
                       }`}
                   >
-                    <Icon size={18} />
+                    <Icon size={20} />
                     {label}
                     {key === 'toWatch' && wishlist.toWatch.length > 0 && (
                       <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
@@ -190,14 +193,15 @@ function App() {
                   <div className="space-y-2">
                     {navigationItems.map(({ key, label, icon: Icon }) => (
                       <button
+                        type="button"
                         key={key}
                         onClick={() => {
                           setCurrentView(key);
                           setIsMobileMenuOpen(false);
                         }}
                         className={`w-full px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-3 ${currentView === key
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                            : 'bg-white/10 text-gray-300 hover:text-white hover:bg-white/20'
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                          : 'bg-white/10 text-gray-300 hover:text-white hover:bg-white/20'
                           }`}
                       >
                         <Icon size={18} />
@@ -222,15 +226,15 @@ function App() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-6 py-8">
+        <main className="max-w-7xl mx-auto px-6 py-12">
           {currentView === 'search' && (
-            <div className="space-y-8">
-              <div className="text-center space-y-4">
-                <h2 className="text-4xl font-bold text-white">
+            <div className="space-y-10">
+              <div className="text-center space-y-5">
+                <h2 className="text-4xl md:text-5xl font-bold text-white">
                   Discover Your Next
                   <span className="bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text"> Favorite</span>
                 </h2>
-                <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+                <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto">
                   Search through millions of movies, TV shows, and anime to build your perfect watchlist
                 </p>
               </div>
@@ -253,16 +257,16 @@ function App() {
             />
           )}
           {currentView === 'toWatch' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold text-white">To Watch</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-white">To Watch</h2>
                 <p className="text-gray-400">
                   {wishlist.toWatch.length} {wishlist.toWatch.length === 1 ? 'item' : 'items'} waiting for you
                 </p>
               </div>
 
               {wishlist.toWatch.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                   {wishlist.toWatch.map(item => (
                     <WishlistCard
                       key={item.id}
@@ -277,7 +281,7 @@ function App() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-16">
+                <div className="text-center py-20">
                   <Clock className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400 text-lg">Your to-watch list is empty</p>
                   <p className="text-gray-500 text-sm mt-2">Search for movies, shows, or anime to add them here</p>
@@ -287,16 +291,16 @@ function App() {
           )}
 
           {currentView === 'watched' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold text-white">Watched</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-white">Watched</h2>
                 <p className="text-gray-400">
                   {wishlist.watched.length} {wishlist.watched.length === 1 ? 'item' : 'items'} completed
                 </p>
               </div>
 
               {wishlist.watched.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                   {wishlist.watched.map(item => (
                     <WishlistCard
                       key={item.id}
@@ -311,7 +315,7 @@ function App() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-16">
+                <div className="text-center py-20">
                   <Eye className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400 text-lg">No watched items yet</p>
                   <p className="text-gray-500 text-sm mt-2">Items you mark as watched will appear here</p>
@@ -345,6 +349,7 @@ function App() {
             onClose={handleCloseEpisodeModal}
             item={selectedItem}
             onUpdateEpisodes={updateEpisodes}
+            onUpdateEpisodesSeasonWise={updateEpisodesSeasonWise}
           />
         )}
       </div>
